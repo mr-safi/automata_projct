@@ -237,3 +237,137 @@ class DFA:
             print(reg_dic)
             print()
             print(max(reg_dic.values()))
+
+    def toMinDfa(self):
+
+        minz_dic = {}
+        table_dic = {}  # for taq in eqch section
+        non_final = []
+        final_s = []
+        telist = []
+        k = 0
+
+        # create min_dic
+        try:
+            for item in self.transition_functions:
+                k += 1
+                if k == 1:
+                    telist.append(item[2])
+                else:
+                    k = 0
+                    telist.append(item[2])
+                    minz_dic[item[0]] = list(telist)
+                    telist.clear()
+
+            # final and non_final seqment at fisrttime
+
+            for item in minz_dic:
+                if item in self.accepting_states:
+                    table_dic[item] = "a" + str(item)
+                else:
+                    table_dic[item] = "b" + str(item)
+
+            # print(table_dic)
+            # print(minz_dic)
+            # intit min_dic
+
+            templist = []
+            for item in minz_dic:
+                templist.clear()
+                # print(minz_dic[item])
+                for k in minz_dic.get(item):  # k is kilid
+                    temp = table_dic[k]
+                    templist.append(temp)
+                minz_dic[item] = list(templist)
+
+            # .......................................................ok....... main loop
+            flag_coninue = True
+            c = 0
+            black_list = []
+            ignor_list = []
+            while flag_coninue:
+                c = c + 1
+                for item in minz_dic:
+                    tag = (table_dic[item][0])  # add akhar each key
+                    nexti = int(item)
+
+                    for i in range(item, len(minz_dic) - 1):
+
+                        tagself = table_dic[nexti]
+                        nexti += 1
+                        ttag = table_dic[nexti]
+
+                        if ttag[0] == tag:
+                            flag_change = True
+                            flag2 = False
+                            for j in range(0, len(self.symbols)):
+                                if ((minz_dic[item][j] != minz_dic[nexti][j]) and (nexti not in black_list) and (
+                                        item not in black_list)):
+                                    flag_coninue = False
+                                    flag_change = False
+                                    flag2 = True
+
+                            if flag_change:
+                                if flag2:
+                                    flag_coninue = True
+
+                                black_list.append(item)
+                                black_list.append(nexti)
+                                newtag = ord(tag) + 1
+                                newtag = chr(newtag) + str(tagself[-1])
+                                table_dic[item] = newtag
+                                table_dic[nexti] = newtag
+                                ignor_list.append(nexti)
+
+
+                self.newfill(minz_dic, table_dic)
+        except Exception as err:
+            print()
+        top = len(minz_dic)
+        for i in range(0, top):
+            if i in ignor_list:
+                if minz_dic.__contains__(i):
+                    minz_dic.__delitem__(i)
+                if table_dic.__contains__(i):
+                    table_dic.__delitem__(i)
+
+        self.showMinDfa(minz_dic, table_dic ,ignor_list)
+
+    def showMinDfa(self, minz_dic, table_dic , ig):
+        print(len(minz_dic))
+        # print(table_dic)
+        for i in minz_dic.items():
+            ite0 = i[0]
+            trans = i[1]
+            for j in range(len(self.symbols)):
+                if (int(ite0) in self.accepting_states )and (int(ite0) not in ig):
+                    begin = "*q" + str(ite0)
+                else:
+                    if ite0 == 0:
+                        begin = "->q" + str(ite0)
+                    else:
+                        begin = "q" + str(ite0)
+
+
+                action = self.symbols[j]
+
+
+                if (int(trans[j][-1]) in self.accepting_states )and (int(trans[j][-1]) not in ig):
+                    dest = "*q" + str(trans[j][-1])
+                else:
+                    dest = "q" + str(trans[j][-1])
+
+                pr = begin+","+action+","+dest
+
+                print(pr)
+
+    def newfill(self, minz_dic, table_dic):
+        templist = []
+        for item in minz_dic:
+            templist.clear()
+            for k in minz_dic.get(item):  # k is kilid
+                # print(k[-1])
+                k = int(k[-1])
+                temp = table_dic[k]
+                templist.append(temp)
+            minz_dic[item] = list(templist)
