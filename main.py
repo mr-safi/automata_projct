@@ -24,3 +24,4 @@ dfa.toMinDfa()
 
 print("\n..........................section 3 : dfa to regex....................\n")
 dfa.toRegex()
+print()
