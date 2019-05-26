@@ -154,4 +154,86 @@ class DFA:
             temp3 = temp1 + "," + transition[1] + "," + temp2
             print(temp3)
 
+    def toRegex(self):
+        reg_dic = {}
+        list2 = []
+        complet_list = []
 
+        for trans in sorted(self.transition_functions):
+
+            t0 = trans[0]
+            t1 = trans[1]
+            t2 = trans[2]
+            # reg_dic[t0].append(str(t1)+str(t2))
+            if not reg_dic.__contains__(t0):
+                list2.append(str(t1) + str(t2))
+                reg_dic[t0] = list2
+            else:
+                list2.append(str(t1) + str(t2))
+                reg_dic[t0] = list(list2)
+                list2.clear()
+        complet_list = list(reg_dic.keys())
+        # for inedx in complet_list:
+        counter = 0
+        inedx = 0
+        # print(reg_dic)
+        while len(
+                complet_list) != 0 and counter != 100:  # ...................................................while.......
+            counter += 1
+
+            if len(reg_dic.get(inedx)) < 5:
+                k1 = reg_dic.get(inedx)[0]
+                k2 = reg_dic.get(inedx)[1]
+                # print(k1,k2 ,inedx)
+                if k2[-1] == k1[-1]:
+                    if k1[-1] != str(inedx):
+                        reg_dic[inedx] = "(" + k1[0] + "+" + k2[0] + ")" + str(k1[-1])
+                    else:
+                        reg_dic[inedx] = "(" + k1[0] + "+" + k2[0] + ")" + "*"
+                        complet_list.remove(inedx)
+
+                else:
+                    if (int(k1[-1]) not in complet_list) and (int(k2[-1]) not in complet_list):
+                        tempk1 = reg_dic.get(int(k1[-1]))
+                        tempk2 = reg_dic.get(int(k2[-1]))
+
+                        reg_dic[inedx] = tempk1 + temp2;
+                        complet_list.remove(inedx)
+                    elif k1[-1] == str(inedx):
+                        reg_dic[inedx] = k1[0] + "*" + "(" + k2 + ")"
+                    elif k2[-1] == str(inedx):
+                        reg_dic[inedx] = "(" + k1 + ")" + k2[0] + "*"
+
+                    elif int(k1[-1]) not in complet_list:
+                        tempk1 = reg_dic.get(int(k1[-1]))
+                        reg_dic[inedx] = k1[0] + tempk1 + "(" + k2 + ")"
+                        # print(reg_dic)
+
+                    elif int(k2[-1]) not in complet_list:
+                        tempk2 = reg_dic.get(int(k2[-1]))
+                        reg_dic[inedx] = k1 + "(" + tempk2 + ")"
+                        # print(reg_dic)
+
+            else:
+                # print(reg_dic)
+                temp = reg_dic.get(inedx)
+                for i in temp:
+                    if i in string.digits:
+                        if int(i) not in complet_list:
+                            temp1 = reg_dic.get(int(i))
+                            temp2 = temp.replace(i, temp1)
+                            reg_dic[inedx] = temp2
+                            complet_list.remove(inedx)
+
+            inedx += 1
+            if inedx == len(reg_dic):
+                inedx = 0
+
+
+        # print(max(reg_dic.values()))
+        if counter == 100:
+            print("erroe ! cant convert to regex")
+        else:
+            print(reg_dic)
+            print()
+            print(max(reg_dic.values()))
